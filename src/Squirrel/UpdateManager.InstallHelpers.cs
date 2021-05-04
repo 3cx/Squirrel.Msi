@@ -83,7 +83,7 @@ namespace Squirrel
             }
 
             RegistryKey GetUninstallRegKey(string productCode, string appName, string arch) {
-                var keyPath = $"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{{{productCode}}}.msisquirrel";
+                var keyPath = $"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{{{productCode}}}.msq";
 
                 bool validateKey(RegistryKey key) {
                     if (key == null) {
@@ -126,7 +126,7 @@ namespace Squirrel
 
                 try {
                     var hive = RegistryHive.CurrentUser;
-                    var view = RegistryView.Default;
+                    var view = arch == "x86" ? RegistryView.Registry32 : RegistryView.Registry64;
                     var regKey = RegistryKey.OpenBaseKey(hive, view)
                         .OpenSubKey(keyPath, false);
                     if (validateKey(regKey)) {

@@ -3,6 +3,7 @@ using Splat;
 using Squirrel.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -117,7 +118,7 @@ namespace Squirrel.Update
                         this.Log().Warn("Deshortcut command not supported in Msi Squirrel");
                         break;
                     case UpdateAction.ProcessStart:
-                        this.Log().Warn("ProcessStart command not supported in Msi Squirrel");
+                        ProcessStart(opt.processStart, opt.processStartArgs, opt.shouldWait);
                         break;
 #endif
                     case UpdateAction.Releasify:
@@ -363,6 +364,62 @@ namespace Squirrel.Update
 
             if (signingOpts != null) {
                 signPEFile(targetSetupExe, signingOpts).Wait();
+            }
+        }
+
+        public void ProcessStart(string exeName, string arguments, bool shouldWait)
+        {
+            if (String.IsNullOrWhiteSpace(exeName))
+            {
+                ShowHelp();
+                return;
+            }
+
+            // Find the latest installed version's app dir
+            var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var releases = ReleaseEntry.ParseReleaseFile(
+                File.ReadAllText(Utility.LocalReleaseFileForAppDir(appDir), Encoding.UTF8));
+
+            // NB: We add the hacked up version in here to handle a migration
+            // issue, where versions of Squirrel pre PR #450 will not understand
+            // prerelease tags, so it will end up writing the release name sans
+            // tags. However, the RELEASES file _will_ have them, so we need to look
+            // for directories that match both the real version, and the sanitized
+            // version, giving priority to the former.
+            var latestAppDir = releases
+                .OrderByDescending(x => x.Version)
+                .SelectMany(x => new[] {
+                    Utility.AppDirForRelease(appDir, x),
+                    Utility.AppDirForVersion(appDir, new SemanticVersion(x.Version.Version.Major, x.Version.Version.Minor, x.Version.Version.Build, ""))
+                })
+                .FirstOrDefault(x => Directory.Exists(x));
+
+            // Check for the EXE name they want
+            var targetExe = new FileInfo(Path.Combine(latestAppDir, exeName.Replace("%20", " ")));
+            this.Log().Info("Want to launch '{0}'", targetExe);
+
+            // Check for path canonicalization attacks
+            if (!targetExe.FullName.StartsWith(latestAppDir, StringComparison.Ordinal))
+            {
+                throw new ArgumentException();
+            }
+
+            if (!targetExe.Exists)
+            {
+                this.Log().Error("File {0} doesn't exist in current release", targetExe);
+                throw new ArgumentException();
+            }
+
+            if (shouldWait) waitForParentToExit();
+
+            try
+            {
+                this.Log().Info("About to launch: '{0}': {1}", targetExe.FullName, arguments ?? "");
+                Process.Start(new ProcessStartInfo(targetExe.FullName, arguments ?? "") { WorkingDirectory = Path.GetDirectoryName(targetExe.FullName) });
+            }
+            catch (Exception ex)
+            {
+                this.Log().ErrorException("Failed to start process", ex);
             }
         }
 

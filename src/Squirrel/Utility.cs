@@ -735,7 +735,7 @@ namespace Squirrel
         public static bool IsAutoUpdateEnabled(string msiManufacturer, string msiAppName, string arch) {
             var keyPath = $"Software\\{msiManufacturer}\\{msiAppName}";
             try {
-                var hive = RegistryHive.LocalMachine;
+                var hive = RegistryHive.CurrentUser;
                 var view = arch == "x86" ? RegistryView.Registry32 : RegistryView.Registry64;
                 var regKey = RegistryKey.OpenBaseKey(hive, view)
                     .OpenSubKey(keyPath, false);
