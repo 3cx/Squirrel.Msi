@@ -21,7 +21,7 @@ For the longest time MSI was the gold standard in packaging and installing Windo
 For the impatient:
 
 ```sh
-git clone https://github.com/3cx/Squirrel.Msi
+git clone --recursive https://github.com/3cx/Squirrel.Msi
 cd squirrel.windows
 git submodule update --init --recursive       ## THIS IS THE PART YOU PROBABLY FORGOT
 .\.NuGet\NuGet.exe restore
