@@ -10,6 +10,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -97,8 +98,9 @@ namespace Squirrel
 
         public static WebClient CreateWebClient() {
             // WHY DOESNT IT JUST DO THISSSSSSSS
-            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
             var ret = new WebClient();
             var wp = WebRequest.DefaultWebProxy;
             if (wp != null) {
