@@ -160,7 +160,8 @@ std::wstring FindLatestAppDir()
 	WIN32_FIND_DATA fileInfo = { 0 };
 	HANDLE hFile = FindFirstFile((ourDir + L"\\app-*").c_str(), &fileInfo);
 	if (hFile == INVALID_HANDLE_VALUE) {
-		return std::wstring();
+		// No app-* folder found, do nothing and launch app
+		return target;
 	}
 
 	version::Semver200_version acc("0.0.0");
@@ -190,10 +191,6 @@ std::wstring FindLatestAppDir()
 			DeleteDirectorySafe(source.c_str());
 		}
 	} while (FindNextFile(hFile, &fileInfo));
-
-	if (acc == version::Semver200_version("0.0.0")) {
-		return std::wstring();
-	}
 
 	FindClose(hFile);
 	return target;
