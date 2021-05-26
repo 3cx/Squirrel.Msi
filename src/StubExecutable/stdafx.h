@@ -15,9 +15,10 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
+#include <sys/stat.h>
 #include <tchar.h>
 #include <string>
 #include <iostream>
-
+#include <algorithm>
 
 // TODO: reference additional headers your program requires here
