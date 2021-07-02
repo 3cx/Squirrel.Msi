@@ -734,32 +734,7 @@ namespace Squirrel
             return (false, "", "", "", "", "");
         }
 
-        public static bool IsAutoUpdateEnabled(string msiManufacturer, string msiAppName, string arch) {
-            var keyPath = $"Software\\{msiManufacturer}\\{msiAppName}";
-            try {
-                var hive = RegistryHive.CurrentUser;
-                var view = arch == "x86" ? RegistryView.Registry32 : RegistryView.Registry64;
-                var regKey = RegistryKey.OpenBaseKey(hive, view)
-                    .OpenSubKey(keyPath, false);
-                if (regKey != null) {
-                    var autoUpdateSetting = regKey.GetValue("AutoUpdate"); 
-                    var isAutoUpdatingOn = autoUpdateSetting != null && autoUpdateSetting.ToString() == "1";
-                    if (isAutoUpdatingOn) {
-                        Log().Info("IsAutoUpdateEnabled: AutoUpdate key exists and is 1. AutoUpdating enabled.");
-                    } else {
-                        Log().Info("IsAutoUpdateEnabled: AutoUpdate key exists but is not 1. AutoUpdating disabled.");
-                    }
-                    return isAutoUpdatingOn;
-                } else {
-                    Log().Info("IsAutoUpdateEnabled: AutoUpdate key does not exist. AutoUpdating disabled.");
-                }
-
-            } catch (Exception ex) {
-                Log().ErrorException("IsAutoUpdateEnabled: Failed to read AutoUpdate registry key. AutoUpdating disabled.", ex);
-            }
-
-            return false;
-        }
+        public static bool IsAutoUpdateEnabled(string msiManufacturer, string msiAppName, string arch) => true;
     }
 
     static unsafe class UnsafeUtility
