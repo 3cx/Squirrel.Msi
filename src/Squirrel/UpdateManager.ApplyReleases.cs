@@ -391,6 +391,8 @@ namespace Squirrel
             }
 
             void fixPinnedExecutables(SemanticVersion newCurrentVersion, bool removeAll = false) {
+                this.Log().Info("fixPinnedExecutables: Static app executable, skiping...");
+                /*
                 if (Environment.OSVersion.Version < new Version(6, 1)) {
                     this.Log().Warn("fixPinnedExecutables: Found OS Version '{0}', exiting...", Environment.OSVersion.VersionString);
                     return;
@@ -438,6 +440,7 @@ namespace Squirrel
                         this.Log().ErrorException(message, ex);
                     }
                 }
+                */
             }
 
             void updateLink(ShellLink shortcut, string newAppPath) {
